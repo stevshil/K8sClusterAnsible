@@ -1,0 +1,9 @@
+*.retry
+secrets/*
+**/*.retry
+**/kube.ini
+Azure/vm/bin
+Azure/vm/include
+Azure/vm/lib
+Azure/vm/lib64
+mypcs/**/sasl_passwd*
