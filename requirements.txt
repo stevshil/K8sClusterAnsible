@@ -3,7 +3,7 @@ boto==2.49.0
 boto3==1.13.24
 botocore==1.16.24
 cffi==1.14.0
-cryptography==2.9.2
+cryptography==3.2
 distro==1.5.0
 docutils==0.15.2
 Jinja2==2.11.2
