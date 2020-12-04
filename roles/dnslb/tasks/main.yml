@@ -1,5 +1,5 @@
 - name: Create DNS LB in Cluster
-  command: /usr/local/bin/kubectl apply -f https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/master/deploy/haproxy-ingress.yaml
+  command: /usr/local/bin/kubectl apply -f https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/v1.4.0/deploy/haproxy-ingress.yaml
 
 - name: Get LB 80 port
   shell: /usr/local/bin/kubectl get svc --namespace=haproxy-controller | grep haproxy-ingress | awk '{print $5}' | awk -F, '{print $1}' | sed -e 's/^.*://' -e 's,/.*$,,'
