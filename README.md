@@ -15,6 +15,7 @@ Best created in AWS using AMI Amazon Linux 2 AMI (HVM), SSD Volume Type.
 
 * Ansible version 2.9.1
 * Python 3.7.5 (optional)
+* AWS security group that allows all systems in your VPC to communicate on any port and any protocol
 
 This code takes into account the use of Python Virtual Environments to run the correct version of Python.
 
@@ -79,3 +80,43 @@ The commands;
 ### Skip the ec2 instance build
 
 ```./create SKIP ~/your/ssh/private/key```
+
+# Issues
+
+The kubernetes haproxy service that is installed in the postsetup.yml is pinned to v1.4.0, and you may find that you get 502 errors from the ELB and when looking at the target group find that the healthcheck is failing.
+
+If it is failing check the haproxy-conroller namespace pods;
+```
+kubectl get pods -n haproxy-controller
+NAME                                       READY   STATUS             RESTARTS   AGE
+haproxy-ingress-596fb4b4f4-l8tzt           0/1     CrashLoopBackOff   53         152m
+ingress-default-backend-558fbc9b46-pwn4n   1/1     Running            0          152m
+```
+If as above you see the CrashLoopBackOff you'll need to try a different version, perhaps the latest as below.
+
+If it is then on the bastion/controller server run the latest version;
+```
+kubectl apply -f https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/v1.4.0/deploy/haproxy-ingress.yaml
+```
+
+NOTE: It can take a while for HAProxy to stabalise once installed, but if it's not you can log on to the controller and check the haproxy.cfg file to see if your service is there.
+
+```
+$ kubectl get pods -n haproxy-controller
+
+$ kubectl exec -n haproxy-controller -it haproxy-ingress-756c77969b-dw459 sh
+$ cd /etc/haproxy
+$ grep -A5 stevesvc haproxy.cfg
+backend default-stevesvc-80
+  mode http
+  balance roundrobin
+  option forwardfor
+  server SRV_1 10.233.92.7:80 check weight 128
+  server SRV_2 10.233.96.6:80 check weight 128
+
+$ nc 10.233.92.7 80
+GET /
+```
+This should then output the web page.
+
+You should then be able to see the web page using your actual DNS name for the service.
